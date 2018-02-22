@@ -16,7 +16,17 @@ echo "[mariadb]
 name = MariaDB
 baseurl = http://yum.mariadb.org/10.2/centos7-amd64
 gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
-gpgcheck=1" &> /etc/yum.repos.d/MARIADB.repo && yum update -y && yum install -y mariadb mariadb-server && yum install autoconf expat-devel libtool libnghttp2-devel pcre-devel -y && yum install -y epel-release && yum install -y autoconf gcc libxml2-devel openssl-devel bzip2-devel curl-devel enchant-devel libjpeg-turbo-devel libpng-devel freetype-devel libicu-devel libmcrypt-devel aspell-devel readline-devel libxslt-devel expat-devel lynx && yum group install "Development Tools" -y && yum -y install gcc.x86_64 pcre-devel.x86_64 openssl-devel.x86_64 git wget unzip zip
+gpgcheck=1" &> /etc/yum.repos.d/MARIADB.repo
+yum update -y
+install_necessary(){
+	yum install -y mariadb mariadb-server
+	yum install autoconf expat-devel libtool libnghttp2-devel pcre-devel -y
+	yum install -y epel-release
+	yum install -y autoconf gcc libxml2-devel openssl-devel bzip2-devel curl-devel enchant-devel libjpeg-turbo-devel libpng-devel freetype-devel libicu-devel libmcrypt-devel aspell-devel readline-devel libxslt-devel expat-devel lynx
+	yum group install "Development Tools" -y
+	yum -y install gcc.x86_64 pcre-devel.x86_64 openssl-devel.x86_64 git wget unzip zip
+}
+
 to_root(){
 	cd "/root/SAT"
 }
@@ -72,9 +82,8 @@ install_pthreads(){
 	to_root
 	wget -O pthreads.zip https://github.com/krakjoe/pthreads/archive/master.zip
 	unzip pthreads.zip
-	cd pthreads/
-	autoconf -i
-	./buildconf
+	cd pthreads*/
+	./phpize
 	./configure
 	make && make install
 	yes | cp -rf "$scriptdir/config/php.ini" "/usr/local/php7/cli/php.ini"
@@ -93,7 +102,8 @@ install_phpmyadmin(){
 	mv phpMyAdmin-4.7.8-all-languages phpMyAdmin
 	rm -rf phpMyAdmin-4.7.8-all-languages.zip
 }
-
-install_apache
-install_php7
-install_phpmyadmin
+#install_necessary
+install_pthreads
+#install_apache
+#install_php7
+#install_phpmyadmin
