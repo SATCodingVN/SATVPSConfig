@@ -30,6 +30,14 @@ install_necessary(){
 to_root(){
 	cd "/root/SAT"
 }
+install_nghttp2(){
+	to_root
+	wget https://github.com/nghttp2/nghttp2/releases/download/v1.30.0/nghttp2-1.30.0.tar.gz
+	tar -xvf nghttp2-1.30.0.tar.gz
+	cd nghttp2-*
+	./configure
+	make && make install
+}
 install_apache(){
 	to_root
 	wget http://www-eu.apache.org/dist//httpd/httpd-2.4.29.tar.gz
@@ -102,8 +110,7 @@ install_phpmyadmin(){
 	mv phpMyAdmin-4.7.8-all-languages phpMyAdmin
 	rm -rf phpMyAdmin-4.7.8-all-languages.zip
 }
-#install_necessary
-install_pthreads
-#install_apache
-#install_php7
-#install_phpmyadmin
+install_necessary
+install_apache
+install_php7
+install_phpmyadmin
