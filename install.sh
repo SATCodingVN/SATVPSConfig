@@ -1,6 +1,8 @@
+#!/bin/bash
+
 #SET
-apacheconf = "/usr/local/apache2/conf"
-scriptdir = $PWD;
+apacheconf="/usr/local/apache2/conf"
+scriptdir=$PWD
 echo "# SAT_CODING # VPS INSTALLER _ `uname -a`" &> /root/sat_install.logs
 mkdir "/root/SAT"
 mkdir "/var/SAT"
@@ -77,8 +79,10 @@ install_pthreads(){
 	make && make install
 	yes | cp -rf "$scriptdir/config/php.ini" "/usr/local/php7/cli/php.ini"
 	yes | cp -rf "$scriptdir/config/php-cli.ini" "/usr/local/php7/cli/php-cli.ini"
-	if ["`php -m | grep pthreads`" == "pthreads"]
+	if [ "`php -m | grep pthreads`" == "pthreads" ]; then
 		echo "INSTALL SUCCESS PTHREADS"
+	elif [ "`php -m | grep pthreads`" != "pthreads" ]; then
+		echo "INSTALL FAIL PTHREADS";
 	fi
 }
 install_phpmyadmin(){
