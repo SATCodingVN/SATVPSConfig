@@ -3,6 +3,9 @@
 #SET
 apacheconf="/usr/local/apache2/conf"
 scriptdir=$PWD
+mysqlconfig=".my.cnf.$$"
+mysqlcommand=".mysql.$$"
+mysql_command="/usr/bin/mysql"
 echo "# SAT_CODING # VPS INSTALLER _ `uname -a`" &> /root/sat_install.logs
 mkdir "/root/SAT"
 mkdir "/var/SAT"
@@ -110,7 +113,27 @@ install_phpmyadmin(){
 	mv phpMyAdmin-4.7.8-all-languages phpMyAdmin
 	rm -rf phpMyAdmin-4.7.8-all-languages.zip
 }
-install_necessary
-install_apache
-install_php7
-install_phpmyadmin
+secure_mariadb(){
+	touch $mysqlconfig $mysqlcommand
+	chmod 600 $mysqlconfig $mysqlcommand
+	echo "# SAT_automatic_secure config file" >$mysqlconfig
+	echo "[mysql]" >>$mysqlconfig
+	echo "user=root" >>$mysqlconfig
+	echo "password=" >>$config
+
+	$mysql_command --defaults-file=$config -q "UPDATE mysql.user SET Password = PASSWORD('CHANGEME') WHERE User = 'root'"
+	$mysql_command --defaults-file=$config -q "DROP USER ''@'localhost'"
+	$mysql_command --defaults-file=$config -q "DROP USER ''@'$(hostname)'"
+	$mysql_command --defaults-file=$config -q "DROP DATABASE test"
+	$mysql_command --defaults-file=$config -q "FLUSH PRIVILEGES"
+}
+start_all_services(){
+	apachectl -k start
+	service mariadb start
+
+}
+#install_necessary
+#install_apache
+#install_php7
+#install_phpmyadmin
+secure_mariadb
