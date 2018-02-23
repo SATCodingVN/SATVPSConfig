@@ -121,11 +121,11 @@ secure_mariadb(){
 	echo "user=root" >>$mysqlconfig
 	echo "password=" >>$config
 
-	$mysql_command --defaults-file=$config -q "UPDATE mysql.user SET Password = PASSWORD('CHANGEME') WHERE User = 'root'"
-	$mysql_command --defaults-file=$config -q "DROP USER ''@'localhost'"
-	$mysql_command --defaults-file=$config -q "DROP USER ''@'$(hostname)'"
-	$mysql_command --defaults-file=$config -q "DROP DATABASE test"
-	$mysql_command --defaults-file=$config -q "FLUSH PRIVILEGES"
+	$mysql_command --defaults-file=$mysqlconfig -q "UPDATE mysql.user SET Password = PASSWORD('CHANGEME') WHERE User = 'root'"
+	$mysql_command --defaults-file=$mysqlconfig -q "DROP USER ''@'localhost'"
+	$mysql_command --defaults-file=$mysqlconfig -q "DROP USER ''@'$(hostname)'"
+	$mysql_command --defaults-file=$mysqlconfig -q "DROP DATABASE test"
+	$mysql_command --defaults-file=$mysqlconfig -q "FLUSH PRIVILEGES"
 }
 start_all_services(){
 	apachectl -k start
