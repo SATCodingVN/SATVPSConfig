@@ -6,10 +6,11 @@ scriptdir=$PWD
 mysqlconfig=".my.cnf.$$"
 mysqlcommand=".mysql.$$"
 mysql_command="/usr/bin/mysql"
-echo "# SAT_CODING # VPS INSTALLER _ `uname -a`" &> /root/sat_install.logs
+sat_log="/root/sat_install.logs"
+echo "# SAT_CODING # VPS INSTALLER _ `uname -a`" &> sat_log
 mkdir "/root/SAT"
 mkdir "/var/SAT"
-echo "uname -a: `uname -a`" >> /root/sat_install.logs
+echo "uname -a: `uname -a`" >> sat_log
 
 echo "Set new pass mysql: ";
 read mysql_password
@@ -121,19 +122,45 @@ secure_mariadb(){
 	echo "user=root" >>$mysqlconfig
 	echo "password=" >>$config
 
-	$mysql_command --defaults-file=$mysqlconfig -q "UPDATE mysql.user SET Password = PASSWORD('CHANGEME') WHERE User = 'root'"
-	$mysql_command --defaults-file=$mysqlconfig -q "DROP USER ''@'localhost'"
-	$mysql_command --defaults-file=$mysqlconfig -q "DROP USER ''@'$(hostname)'"
-	$mysql_command --defaults-file=$mysqlconfig -q "DROP DATABASE test"
-	$mysql_command --defaults-file=$mysqlconfig -q "FLUSH PRIVILEGES"
+	$mysql_command --defaults-file=$mysqlconfig -e "UPDATE mysql.user SET Password = PASSWORD('$mysql_password') WHERE User = 'root'"
+	$mysql_command --defaults-file=$mysqlconfig -e "DROP USER ''@'localhost'"
+	$mysql_command --defaults-file=$mysqlconfig -e "DROP USER ''@'$(hostname)'"
+	$mysql_command --defaults-file=$mysqlconfig -e "DROP DATABASE test"
+	$mysql_command --defaults-file=$mysqlconfig -e "FLUSH PRIVILEGES"
 }
 start_all_services(){
 	apachectl -k start
 	service mariadb start
-
 }
-#install_necessary
-#install_apache
-#install_php7
-#install_phpmyadmin
+restart_all_services(){
+	apachectl -k restart
+	service mariadb restart
+}
+show_info(){
+	echo "=============================="
+	echo "=========INFO========="
+	echo "PHPMyAdmin: http://domain/@_phpMyAdmin_@"
+	echo "USER/PASSWORD MYSQL: root/$mysql_password"
+	echo "webroot: /var/SAT/SATDocs/"
+	echo "=============================="
+}
+echo "[INSTALL PACKAGES]" >>sat_log
+install_necessary >>sat_log
+echo "START INSTALL APACHE"
+echo "[INSTALL APACHE2]" >>sat_log
+install_apache >>sat_log
+echo "INSTALL DONE"
+echo "START INSTALL PHP"
+echo "[INSTALL PHP7.2]" >>sat_log
+install_php7 >>sat_log
+echo "INSTALL DONE"
+echo "START INSTALL PHPMyAdmin"
+install_phpmyadmin
+echo "INSTALL DONE"
+start_all_services
+echo "SECURE MYSQL"
 secure_mariadb
+echo "DONE"
+restart_all_services
+clear
+show_info
