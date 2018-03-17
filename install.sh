@@ -1,28 +1,11 @@
 #!/bin/bash
-
-#SET
-apacheconf="/usr/local/apache2/conf"
-scriptdir=$PWD
-mysqlconfig=".my.cnf.$$"
-mysqlcommand=".mysql.$$"
-mysql_command="/usr/bin/mysql"
-sat_log="/root/sat_install.logs"
-echo "# SAT_CODING # VPS INSTALLER _ `uname -a`" &> sat_log
-mkdir "/root/SAT"
-mkdir "/var/SAT"
-echo "uname -a: `uname -a`" >> sat_log
-
-echo "Set new pass mysql: ";
-read mysql_password
-echo "Install Necessary Software"
-
-echo "[mariadb]
+install_necessary(){
+	echo "[mariadb]
 name = MariaDB
 baseurl = http://yum.mariadb.org/10.2/centos7-amd64
 gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
 gpgcheck=1" &> /etc/yum.repos.d/MARIADB.repo
-yum update -y
-install_necessary(){
+	yum update -y
 	yum install -y mariadb mariadb-server
 	yum install autoconf expat-devel libtool libnghttp2-devel pcre-devel -y
 	yum install -y epel-release
@@ -30,7 +13,15 @@ install_necessary(){
 	yum group install "Development Tools" -y
 	yum -y install gcc.x86_64 pcre-devel.x86_64 openssl-devel.x86_64 git wget unzip zip
 }
-
+clean_for_setting(){
+	if [ -d "/root/SAT" ]; then
+		echo "=============="
+		echo "CLEANING..."
+		echo "PREPARE FOR INSTALLATION"
+		rm -rf "/root/SAT"
+		rm -rf "/var/SAT"
+	fi;
+}
 to_root(){
 	cd "/root/SAT"
 }
@@ -56,7 +47,7 @@ install_apache(){
 	mv apr-util-1.6.1 apr-util
 	cd ../
 	./buildconf
-	./configure --enable-ssl --enable-so --enable-http2 --with-mpm=worker --with-included-apr --with-ssl=/usr/local/openssl --prefix=/usr/local/apache2 --enable-rewrite
+	./configure --enable-ssl --enable-so --enable-http2 --with-mpm=worker --with-included-apr --prefix=/usr/local/apache2 --enable-rewrite --with-crypto
 	make && make install
 	yes | cp -rf "$scriptdir/config/httpd.conf" "/usr/local/apache2/conf/httpd.conf"
 	ln -s /usr/local/apache2/bin/* /usr/bin/
@@ -95,7 +86,7 @@ install_pthreads(){
 	wget -O pthreads.zip https://github.com/krakjoe/pthreads/archive/master.zip
 	unzip pthreads.zip
 	cd pthreads*/
-	./phpize
+	phpize
 	./configure
 	make && make install
 	yes | cp -rf "$scriptdir/config/php.ini" "/usr/local/php7/cli/php.ini"
@@ -144,15 +135,34 @@ show_info(){
 	echo "webroot: /var/SAT/SATDocs/"
 	echo "=============================="
 }
+#SET
+apacheconf="/usr/local/apache2/conf"
+scriptdir=$PWD
+mysqlconfig=".my.cnf.$$"
+mysqlcommand=".mysql.$$"
+mysql_command="/usr/bin/mysql"
+sat_log="/root/sat_install.logs"
+echo "# SAT_CODING # VPS INSTALLER _ `uname -a`" &> sat_log
+echo "# SAT_CODING # VPS INSTALLER _ `uname -a`"
+clean_for_setting
+mkdir "/root/SAT"
+mkdir "/var/SAT"
+echo "uname -a: `uname -a`" >> sat_log
+echo "uname -a: `uname -a`"
+
+echo "Set new pass mysql: "
+read mysql_password
+
 echo "[INSTALL PACKAGES]" >>sat_log
-install_necessary >>sat_log
+echo "[INSTALL PACKAGES]"
+install_necessary #>>sat_log
 echo "START INSTALL APACHE"
 echo "[INSTALL APACHE2]" >>sat_log
-install_apache >>sat_log
+install_apache #>>sat_log
 echo "INSTALL DONE"
 echo "START INSTALL PHP"
 echo "[INSTALL PHP7.2]" >>sat_log
-install_php7 >>sat_log
+install_php7 #>>sat_log
 echo "INSTALL DONE"
 echo "START INSTALL PHPMyAdmin"
 install_phpmyadmin
@@ -162,5 +172,5 @@ echo "SECURE MYSQL"
 secure_mariadb
 echo "DONE"
 restart_all_services
-clear
+#clear
 show_info
